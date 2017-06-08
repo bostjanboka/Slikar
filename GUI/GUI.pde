@@ -54,10 +54,6 @@ String [] imageLoc=new String[6];
 PImage test;
 //lokacija osnovne slike;
 
-//double click
-int n;
-int m;
-int click_c=0;
 
 void setup() {
     size(1000,1000);
@@ -415,15 +411,6 @@ void mouseClicked(MouseEvent evt) {
 }
 
 void mousePressed(){
-   if(click_c==0){
-      m = millis();
-    }
-    if(mouseButton==LEFT){
-      click_c++;
-      if(click_c==2){      n = millis();
-      }
-    }
-
   //pobarvaj sliko ob kliku z misko
   if(mouseX<uploadX+margin&&mouseX>margin&&mouseY>margin&&mouseY<uploadY+margin){
       fill(fillColor);
@@ -445,14 +432,6 @@ void mousePressed(){
   }
 }
 
-void mouseReleased(){
-  if(click_c==2 && n-m < 1000){
-    //doubleClicked();
-    click_c=0;
-  }else if(click_c > 1){
-    click_c=0;
-  }
-}
 
 void fileSelected(File selection) {
   if (selection == null) {
