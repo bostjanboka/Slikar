@@ -54,6 +54,11 @@ String [] imageLoc=new String[6];
 PImage test;
 //lokacija osnovne slike;
 
+//double click
+int n;
+int m;
+int click_c=0;
+
 void setup() {
     size(1000,1000);
   selectInput("Select a file to process:", "fileSelected");
@@ -338,7 +343,42 @@ void mouseDragged(){
   PaintImage();
 }
 
-void mouseClicked() {
+void doubleClicked(){
+  for(int i=0; i< 7; i++){
+     int y=height-margin-(i+1)*120;
+     // rect(width-150, y, 110, 110);
+      if(mouseX>width-150&&mouseX<width-40&&mouseY<y+110&&mouseY>y){
+           indexFilter =i;
+           for(int x=0; x < upload.width; x++){
+             for(int y2=0; y2 < upload.height; y2++){
+                int loc = x + y2*upload.width;
+                upload.pixels[loc]  = filters[indexFilter].pixels[loc];
+               }
+            }
+            upload.updatePixels();
+     }   
+  }
+}
+
+void mouseClicked(MouseEvent evt) {
+  if (evt.getCount() == 2)doubleClicked();
+  for(int i=0; i< 7; i++){
+     int y=height-margin-(i+1)*120;
+     // rect(width-150, y, 110, 110);
+      if(mouseX>width-150&&mouseX<width-40&&mouseY<y+110&&mouseY>y){
+           fillColor=40*i;
+           indexFilter =i;
+     }   
+  }
+  for(int i=0; i < 3; i++){
+     int x = margin + 70*i;
+     fill(250);
+     rect(x-30,height-70, 60,60);
+
+     if(mouseX >x-30 && mouseX < x-30+60 && mouseY > height-70 && mouseY < height-70+60){
+       indexSizeF = i;
+     }
+  }
   //nove vrednosti
   if(mouseX > 300+210+5 && mouseX < 300+210+5+15 && height-50 > 300 && mouseY < height-50+15){
    if(opacity < 1){
@@ -375,23 +415,15 @@ void mouseClicked() {
 }
 
 void mousePressed(){
-   for(int i=0; i< 7; i++){
-     int y=height-margin-(i+1)*120;
-     // rect(width-150, y, 110, 110);
-      if(mouseX>width-150&&mouseX<width-40&&mouseY<y+110&&mouseY>y){
-           fillColor=40*i;
-           indexFilter =i;
-     }   
-  }
-  for(int i=0; i < 3; i++){
-     int x = margin + 70*i;
-     fill(250);
-     rect(x-30,height-70, 60,60);
+   if(click_c==0){
+      m = millis();
+    }
+    if(mouseButton==LEFT){
+      click_c++;
+      if(click_c==2){      n = millis();
+      }
+    }
 
-     if(mouseX >x-30 && mouseX < x-30+60 && mouseY > height-70 && mouseY < height-70+60){
-       indexSizeF = i;
-     }
-  }
   //pobarvaj sliko ob kliku z misko
   if(mouseX<uploadX+margin&&mouseX>margin&&mouseY>margin&&mouseY<uploadY+margin){
       fill(fillColor);
@@ -410,6 +442,15 @@ void mousePressed(){
       mask = empty.copy();
       PaintImage();
       destination.save("slika2");
+  }
+}
+
+void mouseReleased(){
+  if(click_c==2 && n-m < 1000){
+    //doubleClicked();
+    click_c=0;
+  }else if(click_c > 1){
+    click_c=0;
   }
 }
 
