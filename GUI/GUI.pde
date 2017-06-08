@@ -406,7 +406,7 @@ void mouseClicked(MouseEvent evt) {
    
    //klik na save
    if(mouseX > 150 && mouseX < 230 && mouseY > 10 && mouseY < 50){
-       
+       selectOutput("Select a file to write to:", "fileSelectedSave");
    }
 }
 
@@ -445,5 +445,14 @@ void fileSelected(File selection) {
     print(imageName);
     print("getting selected file");
     transferStyle();
+  }
+}
+
+void fileSelectedSave(File selection) {
+  if (selection == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    println("User selected " + selection.getAbsolutePath());
+    upload.save(selection.getAbsolutePath()+".jpg");
   }
 }
