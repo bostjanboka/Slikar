@@ -47,6 +47,7 @@ int uploadY;
 String imageLoc2="";
 String imageName="";
 boolean imageLoaded = false;
+boolean loading = false;
 
 //naslovi nalozenih slik
 String [] imageLoc=new String[6];
@@ -104,11 +105,16 @@ void draw() {
   //gumbi za copice
   for(int i=0; i < 3; i++){
    int x = margin + 70*i;
-   if(i == indexSizeF){
+   if(indexFilter != -1 && i == indexSizeF){
      fill(0, 0, 255);
      rect(x-30-2,height-70-2, 64,64);
    }
-   fill(250);
+   if(indexFilter != -1){
+     fill(250);
+   }
+   else{
+     fill(210);
+   }
    rect(x-30,height-70, 60,60);
    fill(200);
    stroke(0,60,0);
@@ -133,19 +139,28 @@ void draw() {
   }
   //copic za celoten zaslon
   rect(300+210+50,height-70, 60,60);
-  fill(250);
+  if(indexFilter != -1){
+    fill(250);
+  }
+  else{
+    fill(210);
+  }
   rect(300+210+50+4,height-70+4, 60-8,60-8);
+  
+  if(loading){
+     text("LOADING", 450, 450); 
+  }
 }
 
 //resizes the image from given location on disk 
 //max 300x300 px
 PImage uploadImage(String location, PImage goal, int alpha){
   goal=loadImage(location);
-  if(goal.height<goal.width){
-    goal.resize(0,500);  
+  if(goal.height>goal.width){
+    goal.resize(0,750);  
   }
   else{
-    goal.resize(500,0);
+    goal.resize(750,0);
   }
   
   uploadX=goal.width;
@@ -278,6 +293,7 @@ void transferStyle(){
   upload = filters[0].copy();
   mask = upload.copy();
   imageLoaded = true;
+  loading = false;
   
   for(int x=0; x < upload.width; x++){
    for(int y=0; y < upload.height; y++){
@@ -299,6 +315,7 @@ void PaintImage(){
   if(startY < 0)
     startY = 0;
 
+  
   for (int x = startX; x < filters[indexFilter].width && x < mouseX -margin+ sizeF[indexSizeF]; x++) {
       for (int y = startY; y < filters[indexFilter].height-2 && y < mouseY -margin+ sizeF[indexSizeF]; y++ ) {
         PVector rad = new PVector(x - (mouseX-margin), y - (mouseY-margin));
@@ -322,8 +339,10 @@ void PaintImage(){
         upload.pixels[loc]  = color(r+r_,g+g_,b+b_);
       }
   }
-  boolean startMoving=false;
   upload.updatePixels(); 
+  /*
+  boolean startMoving=false;
+  
   for(int i=0; i < filterOrder.length; i++){
     if(filterOrder[i]==indexFilter){
        startMoving = true; 
@@ -332,11 +351,15 @@ void PaintImage(){
        filterOrder[i-1] = filterOrder[i];
     }
   }
-  filterOrder[filterOrder.length-1] = indexFilter;
+  filterOrder[filterOrder.length-1] = indexFilter;*/
 }
 
 void mouseDragged(){
   PaintImage();
+}
+
+void mouseReleased(){
+ mask = empty.copy(); 
 }
 
 void doubleClicked(){
@@ -371,17 +394,17 @@ void mouseClicked(MouseEvent evt) {
      fill(250);
      rect(x-30,height-70, 60,60);
 
-     if(mouseX >x-30 && mouseX < x-30+60 && mouseY > height-70 && mouseY < height-70+60){
+     if(indexFilter != -1 && mouseX >x-30 && mouseX < x-30+60 && mouseY > height-70 && mouseY < height-70+60){
        indexSizeF = i;
      }
   }
   //nove vrednosti
-  if(mouseX > 300+210+5 && mouseX < 300+210+5+15 && height-50 > 300 && mouseY < height-50+15){
+  if(indexFilter != -1 && mouseX > 300+210+5 && mouseX < 300+210+5+15 && height-50 > 300 && mouseY < height-50+15){
    if(opacity < 1){
       opacity += 0.05; 
    }
  }
- if(mouseX > 300-20 && mouseX < 300-20+15 && height-50 > 300 && mouseY < height-50+15){
+ if(indexFilter != -1 && mouseX > 300-20 && mouseX < 300-20+15 && height-50 > 300 && mouseY < height-50+15){
    if(opacity > 0){
       opacity -= 0.05; 
    }
@@ -389,7 +412,7 @@ void mouseClicked(MouseEvent evt) {
   
  //klik na gumb za celoten zaslon
  rect(300+210+50,height-70, 60,60);
- if(mouseX >300+210+50 && mouseX < 300+210+50+60 && mouseY > height-70 && mouseY < height-70+60){
+ if(indexFilter != -1 && mouseX >300+210+50 && mouseX < 300+210+50+60 && mouseY > height-70 && mouseY < height-70+60){
      for(int x=0; x < upload.width; x++){
        for(int y=0; y < upload.height; y++){
           int loc = x + y*upload.width;
@@ -417,19 +440,6 @@ void mousePressed(){
       noStroke();
       ellipse(mouseX, mouseY, big,big);
    }
-  if(mouseX<60&&mouseX>0&&mouseY>0&&mouseY<50 || true){
-      //dobi sliko na ekranu
-      source=get(50,50,filters[0].width,filters[0].height);
-      destination = createImage(source.width, source.height, RGB);
-      println(destination.pixels[15]);
-    
-      source.loadPixels();
-      destination.loadPixels();
-    
-      mask = empty.copy();
-      PaintImage();
-      destination.save("slika2");
-  }
 }
 
 
@@ -438,6 +448,9 @@ void fileSelected(File selection) {
     println("Window was closed or the user hit cancel.");
   } 
   else {
+    imageLoaded = false;
+    loading = true;
+    indexFilter = -1;
     println("User selected " + selection.getAbsolutePath());
     imageLoc2 = selection.getAbsolutePath();
     String[] list = split(selection.getAbsolutePath(), '\\');
